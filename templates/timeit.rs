@@ -2,22 +2,24 @@
 #![allow(redundant_semicolons)]
 
 use criterion::{
-    black_box, criterion_group, criterion_main, Criterion,
+    black_box, criterion_group, criterion_main,
     measurement::{Measurement, WallTime},
+    Criterion,
 };
 
-@IMPORTS@
+/*IMPORTS*/
 
-@INCLUDES@
+/*INCLUDES*/
 
 fn timeit<T: 'static + Measurement>(_crit: &mut Criterion<T>) {
-    @SETUP@;
-    @EXPRESSIONS@
+    /*SETUP*/
+
+    /*EXPRESSIONS*/
 }
 
 criterion_group!(
     name = benches;
-    config = Criterion::default().with_measurement(@TIMER@);
+    config = Criterion::default().with_measurement(/*TIMER*/);
     targets = timeit
 );
 criterion_main!(benches);

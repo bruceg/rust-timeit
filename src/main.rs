@@ -80,13 +80,16 @@ impl Args {
     }
 
     fn setup(&self) -> String {
-        self.setup.clone().unwrap_or_default()
+        self.setup
+            .as_ref()
+            .map(|s| format!("{};", s))
+            .unwrap_or_default()
     }
 
     fn expressions(&self) -> String {
         self.expression
             .iter()
-            .map(|expression| TIMEIT_EXPRESSION.replace("@EXPRESSION@", &expression))
+            .map(|expression| TIMEIT_EXPRESSION.replace("/*EXPRESSION*/", &expression))
             .collect::<Vec<_>>()
             .join("\n")
     }
@@ -138,11 +141,11 @@ fn main() -> Result<(), Error> {
         &format!("benches/{}.rs", BASE),
         TIMEIT_RS,
         &[
-            ("@IMPORTS@", &args.imports()),
-            ("@INCLUDES@", &args.includes()?),
-            ("@SETUP@", &args.setup()),
-            ("@EXPRESSIONS@", &args.expressions()),
-            ("@TIMER@", args.timer()),
+            ("/*IMPORTS*/", &args.imports()),
+            ("/*INCLUDES*/", &args.includes()?),
+            ("/*SETUP*/", &args.setup()),
+            ("/*EXPRESSIONS*/", &args.expressions()),
+            ("/*TIMER*/", args.timer()),
         ],
     )?;
 
