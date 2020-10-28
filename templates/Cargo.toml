@@ -1,0 +1,14 @@
+[package]
+name = "rust-timeit"
+version = "0.0.0"
+edition = "2018"
+
+[dependencies]
+@DEPENDENCIES@
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "@BASE@"
+harness = false
