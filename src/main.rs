@@ -28,6 +28,9 @@ struct Args {
     )]
     dependency: Vec<String>,
 
+    #[argh(option, short = 'u', description = r#"add an extra "use" line"#)]
+    import: Vec<String>,
+
     #[argh(
         option,
         short = 'i',
@@ -35,17 +38,32 @@ struct Args {
     )]
     include: Vec<String>,
 
+    #[argh(switch, description = "use the CPU cycle count")]
+    cycles: bool,
+
     #[argh(positional)]
     expression: Vec<String>,
 }
 
 impl Args {
-    fn setup(&self) -> String {
-        self.setup.clone().unwrap_or_default()
+    fn dependencies(&mut self) -> String {
+        if self.cycles {
+            self.dependency
+                .push(r#"criterion-cycles-per-byte = "0.1.2""#.into());
+        }
+        self.dependency.join("\n")
     }
 
-    fn dependencies(&self) -> String {
-        self.dependency.join("\n")
+    fn imports(&mut self) -> String {
+        if self.cycles {
+            self.import
+                .push("criterion_cycles_per_byte::CyclesPerByte".into());
+        }
+        self.import
+            .iter()
+            .map(|import| format!("use {};\n", import))
+            .collect::<Vec<_>>()
+            .join("")
     }
 
     fn includes(&self) -> Result<String, Error> {
@@ -61,12 +79,24 @@ impl Args {
             .map(|includes| includes.join("\n"))
     }
 
+    fn setup(&self) -> String {
+        self.setup.clone().unwrap_or_default()
+    }
+
     fn expressions(&self) -> String {
         self.expression
             .iter()
             .map(|expression| TIMEIT_EXPRESSION.replace("@EXPRESSION@", &expression))
             .collect::<Vec<_>>()
             .join("\n")
+    }
+
+    fn timer(&self) -> &'static str {
+        if self.cycles {
+            "CyclesPerByte"
+        } else {
+            "WallTime"
+        }
     }
 }
 
@@ -86,7 +116,7 @@ fn create(filename: &str, template: &str, subst: &[(&str, &str)]) -> Result<(), 
 }
 
 fn main() -> Result<(), Error> {
-    let args = argh::from_env::<Args>();
+    let mut args = argh::from_env::<Args>();
     if args.expression.is_empty() {
         eprintln!("Please specify at least one expression");
         process::exit(1);
@@ -108,9 +138,11 @@ fn main() -> Result<(), Error> {
         &format!("benches/{}.rs", BASE),
         TIMEIT_RS,
         &[
+            ("@IMPORTS@", &args.imports()),
+            ("@INCLUDES@", &args.includes()?),
             ("@SETUP@", &args.setup()),
             ("@EXPRESSIONS@", &args.expressions()),
-            ("@INCLUDES@", &args.includes()?),
+            ("@TIMER@", args.timer()),
         ],
     )?;
 

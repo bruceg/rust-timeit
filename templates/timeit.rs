@@ -1,12 +1,23 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+#![allow(unused_imports)]
+#![allow(redundant_semicolons)]
+
+use criterion::{
+    black_box, criterion_group, criterion_main, Criterion,
+    measurement::{Measurement, WallTime},
+};
+
+@IMPORTS@
 
 @INCLUDES@
 
-#[allow(redundant_semicolons)]
-fn timeit(_crit: &mut Criterion) {
+fn timeit<T: 'static + Measurement>(_crit: &mut Criterion<T>) {
     @SETUP@;
     @EXPRESSIONS@
 }
 
-criterion_group!(benches, timeit);
+criterion_group!(
+    name = benches;
+    config = Criterion::default().with_measurement(@TIMER@);
+    targets = timeit
+);
 criterion_main!(benches);
