@@ -12,7 +12,7 @@ const TIMEIT_EXPRESSION: &str = include_str!("../templates/expression.rs");
 const TIMEIT_RS: &str = include_str!("../templates/timeit.rs");
 
 #[derive(Debug, FromArgs)]
-#[argh(description = "FIXME")]
+#[argh(description = r#"Tool for measuring execution time of small Rust code snippets."#)]
 struct Args {
     #[argh(
         option,
@@ -43,6 +43,9 @@ struct Args {
 
     #[argh(positional)]
     expression: Vec<String>,
+
+    #[argh(switch, short = 'v', description = "enable verbose mode")]
+    verbose: bool,
 }
 
 impl Args {
@@ -151,9 +154,11 @@ fn main() -> Result<(), Error> {
 
     fs::remove_dir_all("target/criterion").ok();
 
-    process::Command::new("cargo")
-        .args(&["bench", "--bench", "timeit", "--", "--noplot"])
-        .status()?;
+    let mut cmdline = vec!["bench", "--bench", "timeit", "--", "--noplot"];
+    if args.verbose {
+        cmdline.push("--verbose");
+    }
+    process::Command::new("cargo").args(&cmdline).status()?;
 
     Ok(())
 }
