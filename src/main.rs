@@ -131,6 +131,9 @@ fn main() -> Result<(), Error> {
         process::exit(1);
     }
 
+    // Pre-load the included files before changing the working directory
+    let includes = args.includes()?;
+
     let mut base_dir = dirs::cache_dir().expect("Could not determine cache directory");
     base_dir.push("rust-timeit");
     fs::create_dir_all(&base_dir)?;
@@ -148,7 +151,7 @@ fn main() -> Result<(), Error> {
         TIMEIT_RS,
         &[
             ("/*IMPORTS*/", &args.imports()),
-            ("/*INCLUDES*/", &args.includes()?),
+            ("/*INCLUDES*/", &includes),
             ("/*SETUP*/", &args.setup()),
             ("/*EXPRESSIONS*/", &args.expressions()),
             ("/*TIMER*/", args.timer()),
