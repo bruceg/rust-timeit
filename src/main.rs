@@ -42,6 +42,9 @@ struct Args {
     cycles: bool,
 
     #[argh(positional)]
+    _command: String, // Receives the "timeit" argument from cargo
+
+    #[argh(positional)]
     expression: Vec<String>,
 
     #[argh(switch, short = 'v', description = "enable verbose mode")]
