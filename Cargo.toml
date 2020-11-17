@@ -3,6 +3,12 @@ name = "cargo-timeit"
 version = "0.1.0"
 authors = ["Bruce Guenter <bruce@untroubled.org>"]
 edition = "2018"
+description = "Tool for measuring execution time of small Rust code snippets."
+readme = "README.md"
+homepage = "https://github.com/bruceg/cargo-timeit/"
+repository = "https://github.com/bruceg/cargo-timeit/"
+license = "Apache-2.0"
+categories = ["command-line-utilities", "development-tools::cargo-plugins", "development-tools::profiling"]
 
 [dependencies]
 argh = "0.1.4"
