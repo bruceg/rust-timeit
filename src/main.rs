@@ -7,9 +7,9 @@ use std::{
 };
 
 const BASE: &str = "timeit";
-const CARGO_TOML: &str = include_str!("../templates/Cargo.toml");
-const TIMEIT_EXPRESSION: &str = include_str!("../templates/expression.rs");
-const TIMEIT_RS: &str = include_str!("../templates/timeit.rs");
+const CARGO_TOML: &str = include_str!("Cargo.toml.tmpl");
+const TIMEIT_EXPRESSION: &str = include_str!("expression.rs");
+const TIMEIT_RS: &str = include_str!("timeit.rs");
 
 #[derive(Debug, FromArgs)]
 #[argh(description = r#"Tool for measuring execution time of small Rust code snippets."#)]
