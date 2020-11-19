@@ -14,41 +14,35 @@ const TIMEIT_RS: &str = include_str!("timeit.rs");
 #[derive(Debug, FromArgs)]
 #[argh(description = r#"Tool for measuring execution time of small Rust code snippets."#)]
 struct Args {
-    #[argh(
-        option,
-        short = 's',
-        description = "code to be executed once before timing begins"
-    )]
+    /// code to be executed once before timing begins
+    #[argh(option, short = 's')]
     setup: Option<String>,
 
-    #[argh(
-        option,
-        short = 'd',
-        description = "crate name and version to add to the dependencies section"
-    )]
+    /// crate name and version to add to the dependencies section
+    #[argh(option, short = 'd')]
     dependency: Vec<String>,
 
-    #[argh(option, short = 'u', description = r#"add an extra "use" line"#)]
+    /// add an extra "use" line
+    #[argh(option, short = 'u')]
     import: Vec<String>,
 
-    #[argh(
-        option,
-        short = 'i',
-        description = "include the named file's contents in the source code"
-    )]
+    /// include the named file's contents in the source code
+    #[argh(option, short = 'i')]
     include: Vec<String>,
 
-    #[argh(switch, description = "use the CPU cycle count")]
+    /// use the CPU cycle count instead of wall time
+    #[argh(switch)]
     cycles: bool,
+
+    /// enable verbose mode
+    #[argh(switch, short = 'v')]
+    verbose: bool,
 
     #[argh(positional)]
     _command: String, // Receives the "timeit" argument from cargo
 
     #[argh(positional)]
     expression: Vec<String>,
-
-    #[argh(switch, short = 'v', description = "enable verbose mode")]
-    verbose: bool,
 }
 
 impl Args {
