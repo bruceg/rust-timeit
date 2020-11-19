@@ -23,8 +23,8 @@ struct Args {
     dependency: Vec<String>,
 
     /// add an extra "use" line
-    #[argh(option, short = 'u')]
-    import: Vec<String>,
+    #[argh(option, short = 'u', long = "use")]
+    uses: Vec<String>,
 
     /// include the named file's contents in the source code
     #[argh(option, short = 'i')]
@@ -54,12 +54,12 @@ impl Args {
         self.dependency.join("\n")
     }
 
-    fn imports(&mut self) -> String {
+    fn uses(&mut self) -> String {
         if self.cycles {
-            self.import
+            self.uses
                 .push("criterion_cycles_per_byte::CyclesPerByte".into());
         }
-        self.import
+        self.uses
             .iter()
             .map(|import| format!("use {};\n", import))
             .collect::<Vec<_>>()
@@ -144,7 +144,7 @@ fn main() -> Result<(), Error> {
         &format!("benches/{}.rs", BASE),
         TIMEIT_RS,
         &[
-            ("/*IMPORTS*/", &args.imports()),
+            ("/*USES*/", &args.uses()),
             ("/*INCLUDES*/", &includes),
             ("/*SETUP*/", &args.setup()),
             ("/*EXPRESSIONS*/", &args.expressions()),

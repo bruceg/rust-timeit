@@ -7,7 +7,7 @@ use criterion::{
     Criterion,
 };
 
-/*IMPORTS*/
+/*USES*/
 
 /*INCLUDES*/
 
