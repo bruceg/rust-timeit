@@ -11,5 +11,5 @@ license = "Apache-2.0"
 categories = ["command-line-utilities", "development-tools::cargo-plugins", "development-tools::profiling"]
 
 [dependencies]
-argh = "0.1.4"
+argh = { version = "0.1.4", git = "https://github.com/bruceg/argh", rev = "e96379cbb3ac35611e73ace21b77b2042ac05945" }
 dirs = "3.0"

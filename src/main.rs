@@ -38,7 +38,7 @@ struct Args {
     #[argh(switch, short = 'v')]
     verbose: bool,
 
-    #[argh(positional)]
+    #[argh(positional, omit_usage)]
     _command: String, // Receives the "timeit" argument from cargo
 
     #[argh(positional)]
