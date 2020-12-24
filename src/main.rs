@@ -2,12 +2,14 @@ use argh::FromArgs;
 use std::{
     env,
     fs::{self, File},
-    io::{Error, Read as _, Write as _},
+    io::{Error, ErrorKind, Read as _, Write as _},
+    path::Path,
     process,
     str::FromStr,
 };
 
 const BASE: &str = "timeit";
+const BASE_DIR: &str = "cargo-timeit";
 const CARGO_TOML: &str = include_str!("Cargo.toml.tmpl");
 const TIMEIT_EXPRESSION: &str = include_str!("expression.rs");
 const TIMEIT_RS: &str = include_str!("timeit.rs");
@@ -96,6 +98,14 @@ struct Args {
     #[cfg(target_os = "linux")]
     #[argh(option, short = 'p')]
     perf: Option<PerfMode>,
+
+    /// delete the cache directory before starting, making a fresh start
+    #[argh(switch, short = 'f')]
+    fresh: bool,
+
+    /// clean up the cache directory after a successful finish
+    #[argh(switch, short = 'c')]
+    cleanup: bool,
 
     /// enable verbose mode
     #[argh(switch, short = 'v')]
@@ -191,6 +201,13 @@ fn create(filename: &str, template: &str, subst: &[(&str, &str)]) -> Result<(), 
     fs::rename(tempname, filename)
 }
 
+fn remove_dir_all<P: AsRef<Path>>(path: P) -> Result<(), Error> {
+    fs::remove_dir_all(path).or_else(|error| match error.kind() {
+        ErrorKind::NotFound => Ok(()),
+        _ => Err(error),
+    })
+}
+
 fn main() -> Result<(), Error> {
     let mut args = argh::from_env::<Args>();
     if args.expression.is_empty() {
@@ -208,7 +225,14 @@ fn main() -> Result<(), Error> {
     let includes = args.includes()?;
 
     let mut base_dir = dirs::cache_dir().expect("Could not determine cache directory");
-    base_dir.push("rust-timeit");
+    base_dir.push(BASE_DIR);
+    if args.verbose {
+        println!("Using cache directory {:?}.", base_dir);
+    }
+    if args.fresh {
+        println!("Deleting cache directory.");
+        remove_dir_all(&base_dir)?;
+    }
     fs::create_dir_all(&base_dir)?;
     env::set_current_dir(&base_dir)?;
     fs::create_dir_all("benches")?;
@@ -239,5 +263,9 @@ fn main() -> Result<(), Error> {
     }
     process::Command::new("cargo").args(&cmdline).status()?;
 
+    if args.cleanup {
+        println!("Deleting cache directory.");
+        fs::remove_dir_all(&base_dir)?;
+    }
     Ok(())
 }
