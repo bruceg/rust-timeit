@@ -4,12 +4,69 @@ use std::{
     fs::{self, File},
     io::{Error, Read as _, Write as _},
     process,
+    str::FromStr,
 };
 
 const BASE: &str = "timeit";
 const CARGO_TOML: &str = include_str!("Cargo.toml.tmpl");
 const TIMEIT_EXPRESSION: &str = include_str!("expression.rs");
 const TIMEIT_RS: &str = include_str!("timeit.rs");
+
+const CYCLES_DEP: &str = r#"criterion-cycles-per-byte = "0.1.2""#;
+const PERF_DEP: &str = r#"criterion-linux-perf = "0.1""#;
+const CYCLES_USE: &str = "criterion_cycles_per_byte::CyclesPerByte";
+const PERF_USE: &str = "criterion_linux_perf::{PerfMeasurement, PerfMode}";
+
+macro_rules! perf_mode {
+    ( $( $ident:ident => $word:literal, )* ) => {
+        #[derive(Clone, Copy, Debug, PartialEq)]
+        enum PerfMode {
+            Help,
+            $( $ident, )*
+        }
+
+        impl PerfMode {
+            fn as_perf_mode(&self) -> &'static str {
+                match self {
+                    Self::Help => unreachable!(),
+                    $( Self::$ident => stringify!($ident), )*
+                }
+            }
+
+            fn all_modes() -> Vec<&'static str> {
+                vec![ $( $word, )* ]
+            }
+        }
+
+        impl FromStr for PerfMode {
+            type Err = String;
+            fn from_str(s: &str) -> Result<Self, String> {
+                match s {
+                    "help" => {
+                        eprintln!("Valid values for --perf");
+                        for mode in Self::all_modes() {
+                            eprintln!("  {}", mode);
+                        }
+                        process::exit(1);
+                    }
+                    $( $word => Ok(Self::$ident), )*
+                    _ => Err("Unknown perf mode".into()),
+                }
+            }
+        }
+    };
+}
+
+perf_mode! {
+    Cycles => "cycles",
+    Instructions => "instructions",
+    Branches => "branches",
+    BranchMisses => "branch-misses",
+    CacheRefs => "cache-refs",
+    CacheMisses => "cache-misses",
+    BusCycles => "bus-cycles",
+    RefCycles => "ref-cycles",
+}
 
 #[derive(Debug, FromArgs)]
 #[argh(description = r#"Tool for measuring execution time of small Rust code snippets."#)]
@@ -34,6 +91,12 @@ struct Args {
     #[argh(switch)]
     cycles: bool,
 
+    /// use an alternate measurement instead of wall time (use `--perf
+    /// help` to list all the options for this)
+    #[cfg(target_os = "linux")]
+    #[argh(option, short = 'p')]
+    perf: Option<PerfMode>,
+
     /// enable verbose mode
     #[argh(switch, short = 'v')]
     verbose: bool,
@@ -48,16 +111,22 @@ struct Args {
 impl Args {
     fn dependencies(&mut self) -> String {
         if self.cycles {
-            self.dependency
-                .push(r#"criterion-cycles-per-byte = "0.1.2""#.into());
+            self.dependency.push(CYCLES_DEP.into());
+        }
+        #[cfg(target_os = "linux")]
+        if self.perf.is_some() {
+            self.dependency.push(PERF_DEP.into());
         }
         self.dependency.join("\n")
     }
 
     fn uses(&mut self) -> String {
         if self.cycles {
-            self.uses
-                .push("criterion_cycles_per_byte::CyclesPerByte".into());
+            self.uses.push(CYCLES_USE.into());
+        }
+        #[cfg(target_os = "linux")]
+        if self.perf.is_some() {
+            self.uses.push(PERF_USE.into());
         }
         self.uses
             .iter()
@@ -94,11 +163,15 @@ impl Args {
             .join("\n")
     }
 
-    fn timer(&self) -> &'static str {
+    fn timer(&self) -> String {
+        #[cfg(target_os = "linux")]
+        if let Some(mode) = self.perf {
+            return format!("PerfMeasurement::new(PerfMode::{})", mode.as_perf_mode());
+        }
         if self.cycles {
-            "CyclesPerByte"
+            "CyclesPerByte".into()
         } else {
-            "WallTime"
+            "WallTime".into()
         }
     }
 }
@@ -125,6 +198,12 @@ fn main() -> Result<(), Error> {
         process::exit(1);
     }
 
+    #[cfg(target_os = "linux")]
+    if args.cycles && args.perf.is_some() {
+        eprintln!("Cannot specify both --cycles and --perf");
+        process::exit(1);
+    }
+
     // Pre-load the included files before changing the working directory
     let includes = args.includes()?;
 
@@ -148,7 +227,7 @@ fn main() -> Result<(), Error> {
             ("/*INCLUDES*/", &includes),
             ("/*SETUP*/", &args.setup()),
             ("/*EXPRESSIONS*/", &args.expressions()),
-            ("/*TIMER*/", args.timer()),
+            ("/*TIMER*/", &args.timer()),
         ],
     )?;
 
