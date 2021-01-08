@@ -1,4 +1,4 @@
-cargo-timeit
+rust-timeit
 ============
 
 This package provides a simple way of timing small bits of Rust code. It
@@ -20,7 +20,7 @@ Example
 Which way of creating a zero-length string is fastest?
 
 ```sh
-cargo timeit --setup 'let empty = String::new()' 'String::new()' 'String::from("")' 'empty.clone()' '"".to_owned()'
+rust-timeit --setup 'let empty = String::new()' 'String::new()' 'String::from("")' 'empty.clone()' '"".to_owned()'
 ```
 
 (Hint: `String::new()` is fastest)
@@ -28,7 +28,7 @@ cargo timeit --setup 'let empty = String::new()' 'String::new()' 'String::from("
 License
 -------
 
-Copyright [2020] Bruce Guenter
+Copyright [2021] Bruce Guenter
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may
 not use this file except in compliance with the License.  You may obtain

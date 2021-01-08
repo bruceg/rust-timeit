@@ -9,7 +9,7 @@ use std::{
 };
 
 const BASE: &str = "timeit";
-const BASE_DIR: &str = "cargo-timeit";
+const BASE_DIR: &str = "rust-timeit";
 const CARGO_TOML: &str = include_str!("Cargo.toml.tmpl");
 const TIMEIT_EXPRESSION: &str = include_str!("expression.rs");
 const TIMEIT_RS: &str = include_str!("timeit.rs");
@@ -110,9 +110,6 @@ struct Args {
     /// enable verbose mode
     #[argh(switch, short = 'v')]
     verbose: bool,
-
-    #[argh(positional, omit_usage)]
-    _command: String, // Receives the "timeit" argument from cargo
 
     #[argh(positional)]
     expression: Vec<String>,

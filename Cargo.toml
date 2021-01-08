@@ -1,15 +1,15 @@
 [package]
-name = "cargo-timeit"
-version = "0.1.0"
+name = "rust-timeit"
+version = "0.2.0"
 authors = ["Bruce Guenter <bruce@untroubled.org>"]
 edition = "2018"
 description = "Tool for measuring execution time of small Rust code snippets."
 readme = "README.md"
-homepage = "https://github.com/bruceg/cargo-timeit/"
-repository = "https://github.com/bruceg/cargo-timeit/"
+homepage = "https://github.com/bruceg/rust-timeit/"
+repository = "https://github.com/bruceg/rust-timeit/"
 license = "Apache-2.0"
-categories = ["command-line-utilities", "development-tools::cargo-plugins", "development-tools::profiling"]
+categories = ["command-line-utilities", "development-tools::profiling"]
 
 [dependencies]
-argh = { version = "0.1.4", git = "https://github.com/bruceg/argh", rev = "e96379cbb3ac35611e73ace21b77b2042ac05945" }
+argh = "0.1.4"
 dirs = "3.0"
