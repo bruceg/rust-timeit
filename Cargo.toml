@@ -9,6 +9,7 @@ homepage = "https://github.com/bruceg/rust-timeit/"
 repository = "https://github.com/bruceg/rust-timeit/"
 license = "Apache-2.0"
 categories = ["command-line-utilities", "development-tools::profiling"]
+keywords = ["benchmark", "criterion", "testing", "timing", "optimization"]
 
 [dependencies]
 argh = "0.1.4"
