@@ -99,6 +99,10 @@ struct Args {
     #[argh(option, short = 'p')]
     perf: Option<PerfMode>,
 
+    /// wrap the expressions in `criterion::black_box` to ensure their full evaluation
+    #[argh(switch, short = 'b')]
+    black_box: bool,
+
     /// delete the cache directory before starting, making a fresh start
     #[argh(switch, short = 'f')]
     fresh: bool,
@@ -165,7 +169,12 @@ impl Args {
     fn expressions(&self) -> String {
         self.expression
             .iter()
-            .map(|expression| TIMEIT_EXPRESSION.replace("/*EXPRESSION*/", &expression))
+            .map(|expression| {
+                let black_box = if self.black_box { "black_box" } else { "" };
+                TIMEIT_EXPRESSION
+                    .replace("/*BLACK_BOX*/", black_box)
+                    .replace("/*EXPRESSION*/", &expression)
+            })
             .collect::<Vec<_>>()
             .join("\n")
     }
