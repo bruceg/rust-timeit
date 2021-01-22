@@ -1,3 +1,6 @@
+[![crates.io](https://img.shields.io/crates/v/rust-timeit.svg)](https://crates.io/crates/rust-timeit)
+[![license](https://img.shields.io/badge/license-Apache2.0-blue.svg)](https://github.com/bruceg/rust-timeit/blob/main/LICENSE)
+
 rust-timeit
 ============
 
@@ -12,7 +15,11 @@ library](https://docs.python.org/3/library/timeit.html).
 Installation
 ------------
 
-To install, simply run `cargo install --path .` from the main directory.
+To install the stable version, install Rust and run `cargo install
+rust-timeit`.
+
+To install from source, run `cargo install --path .` from the main
+directory.
 
 Example
 -------
@@ -20,7 +27,7 @@ Example
 Which way of creating a zero-length string is fastest?
 
 ```sh
-rust-timeit --setup 'let empty = String::new()' 'String::new()' 'String::from("")' 'empty.clone()' '"".to_owned()'
+rust-timeit --perf instructions --setup 'let empty = String::new()' 'String::new()' 'String::from("")' 'empty.clone()' '"".to_owned()'
 ```
 
 (Hint: `String::new()` is fastest)
