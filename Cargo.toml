@@ -13,4 +13,4 @@ keywords = ["benchmark", "criterion", "testing", "timing", "optimization"]
 
 [dependencies]
 argh = "0.1.9"
-dirs = "3.0"
+dirs = "4.0.0"
