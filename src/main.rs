@@ -1,4 +1,3 @@
-#![allow(clippy::get_first)]
 use argh::FromArgs;
 use std::{
     env,

@@ -12,5 +12,5 @@ categories = ["command-line-utilities", "development-tools::profiling"]
 keywords = ["benchmark", "criterion", "testing", "timing", "optimization"]
 
 [dependencies]
-argh = "0.1.4"
+argh = "0.1.9"
 dirs = "3.0"
