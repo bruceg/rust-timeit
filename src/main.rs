@@ -1,3 +1,4 @@
+#![allow(clippy::get_first)]
 use argh::FromArgs;
 use std::{
     env,
@@ -23,14 +24,12 @@ macro_rules! perf_mode {
     ( $( $ident:ident => $word:literal, )* ) => {
         #[derive(Clone, Copy, Debug, PartialEq)]
         enum PerfMode {
-            Help,
             $( $ident, )*
         }
 
         impl PerfMode {
             fn as_perf_mode(&self) -> &'static str {
                 match self {
-                    Self::Help => unreachable!(),
                     $( Self::$ident => stringify!($ident), )*
                 }
             }
@@ -173,7 +172,7 @@ impl Args {
                 let black_box = if self.black_box { "black_box" } else { "" };
                 TIMEIT_EXPRESSION
                     .replace("/*BLACK_BOX*/", black_box)
-                    .replace("/*EXPRESSION*/", &expression)
+                    .replace("/*EXPRESSION*/", expression)
             })
             .collect::<Vec<_>>()
             .join("\n")
