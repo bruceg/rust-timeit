@@ -7,7 +7,7 @@ edition = "2021"
 @DEPENDENCIES@
 
 [dev-dependencies]
-criterion = "0.3.3"
+criterion = { version = "0.3.6", default-features = false, features = ["html_reports"] }
 
 [[bench]]
 name = "@BASE@"
