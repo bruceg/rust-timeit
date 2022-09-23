@@ -2,7 +2,7 @@
 name = "rust-timeit"
 version = "0.3.0"
 authors = ["Bruce Guenter <bruce@untroubled.org>"]
-edition = "2018"
+edition = "2021"
 description = "Tool for measuring execution time of small Rust code snippets."
 readme = "README.md"
 homepage = "https://github.com/bruceg/rust-timeit/"
