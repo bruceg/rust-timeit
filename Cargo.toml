@@ -13,5 +13,5 @@ keywords = ["benchmark", "criterion", "testing", "timing", "optimization"]
 rust-version = "1.85"
 
 [dependencies]
-argh = "0.1.9"
-dirs = "4.0.0"
+argh = "0.1.19"
+dirs = "6.0.0"
