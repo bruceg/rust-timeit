@@ -1,0 +1,108 @@
+name: Test Suite
+
+on:
+  pull_request:
+  merge_group:
+    types: [checks_requested]
+  push:
+    branches:
+      - main
+
+concurrency:
+  # For pull requests, cancel running workflows, for main, run all
+  #
+  # `github.event.number` exists for pull requests, otherwise fall back to SHA
+  # for main
+  group: ${{ github.workflow }}-${{ github.event.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  RUST_BACKTRACE: full
+  VERBOSE: true
+  CI: true
+  PROFILE: debug
+
+jobs:
+  check-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+
+      - name: "Check format"
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all --check
+
+  check-clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: Swatinem/rust-cache@v2
+
+      - name: "Check clippy"
+        run: cargo clippy -- --D warnings
+
+  check-deny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: Swatinem/rust-cache@v2
+
+      - name: "Install cargo-deny"
+        run: cargo install --locked cargo-deny
+      - name: "Check deny list"
+        run: cargo deny check
+      - name: "Check if Cargo.lock changed"
+        run: git diff --exit-code
+
+  check-msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: Swatinem/rust-cache@v2
+
+      - name: "Install cargo-msrv"
+        run: cargo install --locked cargo-msrv
+      - name: "Check MSRV"
+        run: cargo msrv verify
+
+  check-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: Swatinem/rust-cache@v2
+
+      - name: "Run timeit"
+        run: cargo run -- --setup 'let empty = String::new()' 'empty.clone()'
+      - name: "Run timeit with --cycles"
+        run: cargo run -- --cycles --setup 'let empty = String::new()' 'empty.clone()'
+      - name: "Run timeit with --perf"
+        run: cargo run -- --perf instructions --setup 'let empty = String::new()' 'empty.clone()'
