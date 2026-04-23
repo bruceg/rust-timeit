@@ -2,7 +2,7 @@
 #![allow(redundant_semicolons)]
 
 use criterion::{
-    black_box, criterion_group, criterion_main,
+    criterion_group, criterion_main,
     measurement::{Measurement, WallTime},
     Criterion,
 };

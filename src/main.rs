@@ -97,7 +97,7 @@ struct Args {
     #[argh(option, short = 'p')]
     perf: Option<PerfMode>,
 
-    /// wrap the expressions in `criterion::black_box` to ensure their full evaluation
+    /// wrap the expressions in `std::hint::black_box` to ensure their full evaluation
     #[argh(switch, short = 'b')]
     black_box: bool,
 
@@ -169,7 +169,7 @@ impl Args {
             .iter()
             .map(|expression| {
                 let boxed_expression = if self.black_box {
-                    format!("black_box({{{expression}}})")
+                    format!("std::hint::black_box({{{expression}}})")
                 } else {
                     expression.clone()
                 };
