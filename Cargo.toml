@@ -14,4 +14,4 @@ rust-version = "1.85"
 
 [dependencies]
 argh = { version = "0.1", default-features = false, features = ["help"] }
-dirs = "4.0.0"
+dirs = "6.0.0"
