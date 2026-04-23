@@ -14,10 +14,8 @@ const CARGO_TOML: &str = include_str!("Cargo.toml.tmpl");
 const TIMEIT_EXPRESSION: &str = include_str!("expression.rs");
 const TIMEIT_RS: &str = include_str!("timeit.rs");
 
-const CYCLES_DEP: &str = r#"criterion-cycles-per-byte = "0.1.2""#;
-const PERF_DEP: &str = r#"criterion-linux-perf = "0.1""#;
-const CYCLES_USE: &str = "criterion_cycles_per_byte::CyclesPerByte";
-const PERF_USE: &str = "criterion_linux_perf::{PerfMeasurement, PerfMode}";
+const CYCLES_DEP: &str = r#"criterion-cycles-per-byte = "0.6""#;
+const PERF_DEPS: &[&str] = &[r#"criterion-perf-events = "0.4""#, r#"perfcnt = "0.8""#];
 
 macro_rules! perf_mode {
     ( $( $ident:ident => $word:literal, )* ) => {
@@ -27,7 +25,7 @@ macro_rules! perf_mode {
         }
 
         impl PerfMode {
-            fn as_perf_mode(&self) -> &'static str {
+            fn as_hardware_event_type(&self) -> &'static str {
                 match self {
                     $( Self::$ident => stringify!($ident), )*
                 }
@@ -58,14 +56,14 @@ macro_rules! perf_mode {
 }
 
 perf_mode! {
-    Cycles => "cycles",
-    Instructions => "instructions",
-    Branches => "branches",
+    BranchInstructions => "branch-instructions",
     BranchMisses => "branch-misses",
-    CacheRefs => "cache-refs",
-    CacheMisses => "cache-misses",
     BusCycles => "bus-cycles",
-    RefCycles => "ref-cycles",
+    CacheMisses => "cache-misses",
+    CacheReferences => "cache-references",
+    CPUCycles => "cpu-cycles",
+    Instructions => "instructions",
+    RefCPUCycles => "reference-cpu-cycles",
 }
 
 #[derive(Debug, FromArgs)]
@@ -120,19 +118,14 @@ impl Args {
         }
         #[cfg(target_os = "linux")]
         if self.perf.is_some() {
-            self.dependency.push(PERF_DEP.into());
+            for dep in PERF_DEPS {
+                self.dependency.push(dep.to_string());
+            }
         }
         self.dependency.join("\n")
     }
 
-    fn uses(&mut self) -> String {
-        if self.cycles {
-            self.uses.push(CYCLES_USE.into());
-        }
-        #[cfg(target_os = "linux")]
-        if self.perf.is_some() {
-            self.uses.push(PERF_USE.into());
-        }
+    fn uses(&self) -> String {
         self.uses
             .iter()
             .map(|import| format!("use {};\n", import))
@@ -170,11 +163,14 @@ impl Args {
 
     fn timer(&self) -> String {
         #[cfg(target_os = "linux")]
-        if let Some(mode) = self.perf {
-            return format!("PerfMeasurement::new(PerfMode::{})", mode.as_perf_mode());
+        if let Some(perf) = self.perf {
+            return format!(
+                "criterion_perf_events::Perf::new(::perfcnt::linux::PerfCounterBuilderLinux::from_hardware_event(::perfcnt::linux::HardwareEventType::{}),)",
+                perf.as_hardware_event_type()
+            );
         }
         if self.cycles {
-            "CyclesPerByte".into()
+            "::criterion_cycles_per_byte::CyclesPerByte".into()
         } else {
             "WallTime".into()
         }
