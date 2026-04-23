@@ -168,9 +168,13 @@ impl Args {
         self.expression
             .iter()
             .map(|expression| {
-                let black_box = if self.black_box { "black_box" } else { "" };
+                let boxed_expression = if self.black_box {
+                    format!("black_box({{{expression}}})")
+                } else {
+                    expression.clone()
+                };
                 TIMEIT_EXPRESSION
-                    .replace("/*BLACK_BOX*/", black_box)
+                    .replace("/*BOXED_EXPRESSION*/", &boxed_expression)
                     .replace("/*EXPRESSION*/", expression)
             })
             .collect::<Vec<_>>()
