@@ -2,6 +2,13 @@
 
 ## Unreleased
 
-- Updated to use the Rust 2024 edition.
+### Breaking Changes
+
+- Updated to use the Rust 2024 edition in generated code.
+- Made the black box mode unconditional and dropped the `--black-box` flag,
+  since we always want to execute the given expression.
+
+### Fixes
+
 - Fixed warning about `unnecessary parentheses around closure body`.
 - Use `std::hint::black_box` instead of the one from `criterion`.

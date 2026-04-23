@@ -97,10 +97,6 @@ struct Args {
     #[argh(option, short = 'p')]
     perf: Option<PerfMode>,
 
-    /// wrap the expressions in `std::hint::black_box` to ensure their full evaluation
-    #[argh(switch, short = 'b')]
-    black_box: bool,
-
     /// delete the cache directory before starting, making a fresh start
     #[argh(switch, short = 'f')]
     fresh: bool,
@@ -167,16 +163,7 @@ impl Args {
     fn expressions(&self) -> String {
         self.expression
             .iter()
-            .map(|expression| {
-                let boxed_expression = if self.black_box {
-                    format!("std::hint::black_box({{{expression}}})")
-                } else {
-                    expression.clone()
-                };
-                TIMEIT_EXPRESSION
-                    .replace("/*BOXED_EXPRESSION*/", &boxed_expression)
-                    .replace("/*EXPRESSION*/", expression)
-            })
+            .map(|expression| TIMEIT_EXPRESSION.replace("/*EXPRESSION*/", expression))
             .collect::<Vec<_>>()
             .join("\n")
     }
