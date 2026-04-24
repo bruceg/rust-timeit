@@ -1,6 +1,6 @@
 [package]
 name = "rust-timeit"
-version = "0.3.0"
+version = "0.5.0"
 authors = ["Bruce Guenter <bruce@untroubled.org>"]
 edition = "2024"
 description = "Tool for measuring execution time of small Rust code snippets."
